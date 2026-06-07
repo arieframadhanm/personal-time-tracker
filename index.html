@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Time Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --surface: #1a1916;
+    --surface2: #242220;
+    --border: #2e2c29;
+    --gold: #c9a84c;
+    --gold-light: #e8c87a;
+    --gold-dim: rgba(201,168,76,0.15);
+    --text: #f0ead8;
+    --text-dim: #8a8070;
+    --text-muted: #504840;
+    --deen: #7ec8a4;
+    --family: #e8a0b4;
+    --career: #7aaee8;
+    --health: #e8b07a;
+    --education: #a07ae8;
+    --sidequest: #e8e07a;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 32px 40px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .logo { display: flex; flex-direction: column; gap: 2px; }
+  .logo-year {
+    font-family: 'DM Serif Display', serif;
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  .logo-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+  .header-date {
+    text-align: right;
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 40px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* ── MAIN LAYOUT ── */
+  main { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 120px); }
+
+  /* ── SIDEBAR ── */
+  aside {
+    border-right: 1px solid var(--border);
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .aside-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    padding: 0 8px;
+    margin-bottom: 4px;
+    margin-top: 8px;
+  }
+
+  .goal-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s;
+    border: 1px solid transparent;
+  }
+  .goal-item:hover { background: var(--surface); }
+  .goal-item.selected { background: var(--surface2); border-color: var(--border); }
+
+  .goal-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .goal-info { flex: 1; min-width: 0; }
+  .goal-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .goal-pillar {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .goal-hours {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  /* ── CONTENT PANEL ── */
+  .content { padding: 32px 40px; overflow-y: auto; }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .stat-label { font-size: 11px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--text); line-height: 1; }
+  .stat-sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .stat-gold .stat-value { color: var(--gold); }
+
+  /* ── LOG FORM ── */
+  .log-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr 100px auto; gap: 12px; align-items: end; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 11px; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase; }
+
+  input, select, textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+  select option { background: var(--surface2); }
+
+  .btn-log {
+    background: var(--gold);
+    color: #0f0e0c;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+  .btn-log:hover { background: var(--gold-light); }
+
+  /* ── LOG TABLE ── */
+  .log-table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: var(--surface); }
+  td { padding: 12px 14px; color: var(--text-dim); }
+  td.goal-cell { color: var(--text); font-weight: 500; }
+  td.hours-cell { color: var(--gold); font-weight: 600; font-family: 'DM Serif Display', serif; font-size: 16px; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-del {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .btn-del:hover { color: #e87a7a; background: rgba(232,122,122,0.1); }
+
+  /* ── QUARTER BREAKDOWN ── */
+  .quarter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .q-label { font-size: 10px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
+  .q-total { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); }
+  .q-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; margin-bottom: 14px; }
+  .q-current { border-color: var(--gold); }
+  .q-current .q-total { color: var(--gold); }
+
+  .q-bars { display: flex; flex-direction: column; gap: 6px; }
+  .q-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-dim); }
+  .q-bar-name { width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .q-bar-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .q-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+  .q-bar-hrs { width: 30px; text-align: right; }
+
+  /* ── PILLAR BREAKDOWN ── */
+  .pillar-section { margin-bottom: 28px; }
+  .pillar-bars { display: flex; flex-direction: column; gap: 12px; }
+  .pillar-row { display: flex; align-items: center; gap: 14px; }
+  .pillar-name { width: 160px; font-size: 13px; color: var(--text-dim); }
+  .pillar-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .pillar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .pillar-val { width: 60px; text-align: right; font-size: 13px; font-weight: 600; color: var(--text); }
+
+  /* ── VIEW TOGGLE ── */
+  .view-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .vt-btn {
+    padding: 5px 14px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .vt-btn:hover { color: var(--text); }
+  .vt-btn.active { background: var(--surface2); color: var(--gold); }
+
+  /* ── PILLAR GROUP ── */
+  .pillar-group { margin-bottom: 8px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+  .pillar-group-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    cursor: pointer;
+    background: var(--surface2);
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .pillar-group-header:hover { background: #2a2825; }
+  .pillar-group-chevron {
+    font-size: 10px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .pillar-group.collapsed .pillar-group-chevron { transform: rotate(-90deg); }
+  .pillar-group-name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex: 1;
+  }
+  .pillar-group-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .pillar-group-hrs { font-family: 'DM Serif Display', serif; font-size: 15px; }
+  .pillar-group-body { display: block; }
+  .pillar-group.collapsed .pillar-group-body { display: none; }
+  .pillar-group-body table { width: 100%; border-collapse: collapse; }
+  .pillar-group-body tr { border-top: 1px solid var(--border); }
+  .pillar-group-body tr:hover { background: var(--surface); }
+  .pillar-group-body td { padding: 10px 14px; font-size: 13px; color: var(--text-dim); }
+
+  /* ── GOAL MANAGER ── */
+  .gm-pillar-block { margin-bottom: 20px; }
+  .gm-pillar-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 0 4px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gm-pillar-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .gm-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: background 0.15s;
+    margin-bottom: 4px;
+  }
+  .gm-row:hover { background: var(--surface2); border-color: var(--border); }
+  .gm-drag { color: var(--text-muted); cursor: grab; font-size: 14px; flex-shrink:0; user-select:none; }
+  .gm-drag:active { cursor: grabbing; }
+  .gm-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .gm-name { flex:1; font-size:13px; color:var(--text); }
+  .gm-name-input {
+    flex:1; font-size:13px; background:var(--bg);
+    border:1px solid var(--gold); border-radius:5px;
+    color:var(--text); padding:4px 8px; font-family:'DM Sans',sans-serif;
+    outline:none;
+  }
+  .gm-priority { font-size:11px; color:var(--text-muted); width:28px; flex-shrink:0; }
+  .gm-actions { display:flex; gap:6px; flex-shrink:0; }
+  .gm-btn {
+    background:none; border:1px solid var(--border); border-radius:5px;
+    color:var(--text-dim); cursor:pointer; font-size:11px; padding:4px 9px;
+    font-family:'DM Sans',sans-serif; transition:all 0.15s;
+  }
+  .gm-btn:hover { border-color:var(--gold); color:var(--gold); }
+  .gm-btn.danger:hover { border-color:#e87a7a; color:#e87a7a; }
+  .gm-btn.save { border-color:var(--gold); color:var(--gold); }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
+
+  /* ── PANEL VISIBILITY ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── EXPORT BAR ── */
+  .export-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .btn-outline {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--gold);
+    color: #0f0e0c;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+    aside { border-right: none; border-bottom: 1px solid var(--border); max-height: 260px; overflow-y: auto; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .quarter-grid { grid-template-columns: 1fr 1fr; }
+    .form-row { grid-template-columns: 1fr 1fr; }
+    header { padding: 20px; }
+    .content { padding: 20px; }
+    .tabs { padding: 0 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-year">✦ 2026</span>
+    <span class="logo-title">Time Tracker</span>
+  </div>
+  <div class="header-date" id="headerDate"></div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('log')">Log Hours</div>
+  <div class="tab" onclick="switchTab('quarterly')">Quarterly</div>
+  <div class="tab" onclick="switchTab('yearly')">Yearly Overview</div>
+  <div class="tab" onclick="switchTab('goals')">Manage Goals</div>
+</div>
+
+<main>
+  <aside>
+    <div class="aside-label">Goals</div>
+    <div id="goalList"></div>
+  </aside>
+
+  <div class="content">
+
+    <!-- LOG TAB -->
+    <div id="panel-log" class="panel active">
+      <div class="stats-row" id="statsRow"></div>
+
+      <div class="log-section">
+        <div class="section-title">Log Time</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Goal</label>
+            <select id="selectGoal"></select>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="inputDate">
+          </div>
+          <div class="form-group">
+            <label>Hours</label>
+            <input type="number" id="inputHours" min="0.5" max="24" step="0.5" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button class="btn-log" onclick="logTime()">+ Log</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="log-section">
+        <div class="section-title" style="margin-bottom:16px">
+          Recent Logs
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0">
+            <span style="font-size:11px;color:var(--text-muted);font-family:'DM Sans';letter-spacing:1px">VIEW</span>
+            <div class="view-toggle">
+              <button class="vt-btn active" id="vtGoal" onclick="setLogView('goal')">By Goal</button>
+              <button class="vt-btn" id="vtPillar" onclick="setLogView('pillar')">By Pillar</button>
+            </div>
+          </div>
+        </div>
+        <div id="logGoalView">
+          <div class="log-table-wrap">
+            <table>
+              <thead><tr>
+                <th>Date</th><th>Goal</th><th>Pillar</th><th>Hours</th><th></th>
+              </tr></thead>
+              <tbody id="logBody"></tbody>
+            </table>
+            <div id="logEmpty" class="empty" style="display:none">
+              <div class="empty-icon">⏱</div>
+              No logs yet. Start tracking your time!
+            </div>
+          </div>
+        </div>
+        <div id="logPillarView" style="display:none">
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px">
+            <button class="btn-outline" style="padding:5px 12px;font-size:11px" onclick="expandAll()">Expand All</button>
+            <button class="btn-outline" style="padding:5px 12px;font-size:11px" onclick="collapseAll()">Collapse All</button>
+          </div>
+          <div id="pillarGroups"></div>
+          <div id="pillarEmpty" class="empty" style="display:none">
+            <div class="empty-icon">⏱</div>
+            No logs yet. Start tracking your time!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUARTERLY TAB -->
+    <div id="panel-quarterly" class="panel">
+      <div class="quarter-grid" id="quarterGrid"></div>
+      <div class="log-section">
+        <div class="section-title">Goal Breakdown — Current Quarter</div>
+        <div id="qGoalBreakdown"></div>
+      </div>
+    </div>
+
+    <!-- YEARLY TAB -->
+    <div id="panel-yearly" class="panel">
+      <div class="stats-row" id="yearlyStats"></div>
+      <div class="log-section pillar-section">
+        <div class="section-title">Hours by Pillar</div>
+        <div class="pillar-bars" id="pillarBars"></div>
+      </div>
+      <div class="log-section">
+        <div class="section-title">All Goals — Year to Date</div>
+        <div id="allGoalsBars"></div>
+      </div>
+      <div class="export-bar">
+        <button class="btn-outline" onclick="exportCSV()">↓ Export CSV</button>
+      </div>
+    </div>
+
+    <!-- MANAGE GOALS TAB -->
+    <div id="panel-goals" class="panel">
+      <div class="log-section">
+        <div class="section-title">Add New Goal</div>
+        <div class="form-row" style="grid-template-columns:1fr 160px 80px auto">
+          <div class="form-group">
+            <label>Goal Name</label>
+            <input type="text" id="newGoalName" placeholder="e.g. Baca buku 1x seminggu">
+          </div>
+          <div class="form-group">
+            <label>Pillar</label>
+            <select id="newGoalPillar">
+              <option>Deen</option>
+              <option>Family</option>
+              <option>Career & Finance</option>
+              <option>Health</option>
+              <option>Education & Knowledge</option>
+              <option>Side Quest</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
+            <select id="newGoalPriority">
+              <option>P1</option>
+              <option selected>P2</option>
+              <option>P3</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button class="btn-log" onclick="addGoal()">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="log-section">
+        <div class="section-title">Your Goals</div>
+        <div id="goalsManagerList"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const PILLARS = {
+  Deen: { color: '#7ec8a4' },
+  Family: { color: '#e8a0b4' },
+  'Career & Finance': { color: '#7aaee8' },
+  Health: { color: '#e8b07a' },
+  'Education & Knowledge': { color: '#a07ae8' },
+  'Side Quest': { color: '#e8e07a' },
+};
+
+let GOALS = []; // loaded from Supabase
+
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://svrdesatfchrhkriycwa.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_rqBfGuMFkM0XwQFgRdLk-A_gY4Vh74v';
+
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    ...opts,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || '',
+      ...(opts.headers || {})
+    }
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function loadLogs() {
+  setStatus('syncing');
+  try {
+    const data = await sbFetch('logs?select=*&order=date.desc,created_at.desc');
+    logs = data.map(r => ({ id: r.id, goalId: r.goal_id, date: r.date, hours: parseFloat(r.hours) }));
+    setStatus('synced');
+  } catch(e) {
+    setStatus('error');
+    console.error('Load error:', e);
+  }
+}
+
+async function loadGoals() {
+  try {
+    const data = await sbFetch('goals?select=*&order=sort_order.asc,id.asc');
+    GOALS = data.map(r => ({ id: r.id, name: r.name, pillar: r.pillar, priority: r.priority, sort_order: r.sort_order }));
+    rebuildGoalSelect();
+  } catch(e) { console.error('Load goals error:', e); }
+}
+
+async function addGoal() {
+  const name = document.getElementById('newGoalName').value.trim();
+  const pillar = document.getElementById('newGoalPillar').value;
+  const priority = document.getElementById('newGoalPriority').value;
+  if (!name) return showToast('Enter a goal name ✦');
+  const maxOrder = GOALS.length ? Math.max(...GOALS.map(g => g.sort_order || 0)) : 0;
+  try {
+    const data = await sbFetch('goals', {
+      method: 'POST', prefer: 'return=representation',
+      body: JSON.stringify({ name, pillar, priority, sort_order: maxOrder + 1 })
+    });
+    const r = data[0];
+    GOALS.push({ id: r.id, name: r.name, pillar: r.pillar, priority: r.priority, sort_order: r.sort_order });
+    document.getElementById('newGoalName').value = '';
+    rebuildGoalSelect();
+    renderAll();
+    showToast('Goal added ✦');
+  } catch(e) { showToast('Error adding goal'); console.error(e); }
+}
+
+async function saveGoalName(id) {
+  const input = document.getElementById('gedit-' + id);
+  const name = input?.value.trim();
+  if (!name) return;
+  try {
+    await sbFetch('goals?id=eq.' + id, { method: 'PATCH', body: JSON.stringify({ name }) });
+    const g = GOALS.find(x => x.id === id);
+    if (g) g.name = name;
+    rebuildGoalSelect();
+    renderAll();
+    showToast('Goal updated ✦');
+  } catch(e) { showToast('Error updating'); console.error(e); }
+}
+
+async function deleteGoal(id) {
+  const g = GOALS.find(x => x.id === id);
+  const hasLogs = logs.some(l => l.goalId === id);
+  if (hasLogs && !confirm(`"${g?.name}" has logged hours. Delete anyway?`)) return;
+  try {
+    await sbFetch('goals?id=eq.' + id, { method: 'DELETE' });
+    GOALS = GOALS.filter(x => x.id !== id);
+    rebuildGoalSelect();
+    renderAll();
+    showToast('Goal removed ✦');
+  } catch(e) { showToast('Error deleting goal'); console.error(e); }
+}
+
+async function moveGoal(id, dir) {
+  const idx = GOALS.findIndex(g => g.id === id);
+  const swapIdx = idx + dir;
+  if (swapIdx < 0 || swapIdx >= GOALS.length) return;
+  const a = GOALS[idx], b = GOALS[swapIdx];
+  const aOrder = a.sort_order, bOrder = b.sort_order;
+  try {
+    await sbFetch('goals?id=eq.' + a.id, { method: 'PATCH', body: JSON.stringify({ sort_order: bOrder }) });
+    await sbFetch('goals?id=eq.' + b.id, { method: 'PATCH', body: JSON.stringify({ sort_order: aOrder }) });
+    a.sort_order = bOrder; b.sort_order = aOrder;
+    GOALS.sort((x, y) => (x.sort_order || 0) - (y.sort_order || 0));
+    rebuildGoalSelect();
+    renderAll();
+  } catch(e) { showToast('Error reordering'); console.error(e); }
+}
+
+let editingGoalId = null;
+function startEditGoal(id) {
+  editingGoalId = id;
+  renderGoalsManager();
+  setTimeout(() => document.getElementById('gedit-' + id)?.focus(), 50);
+}
+function cancelEditGoal() {
+  editingGoalId = null;
+  renderGoalsManager();
+}
+
+function rebuildGoalSelect() {
+  const sel = document.getElementById('selectGoal');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '';
+  let lastPillar = '';
+  GOALS.forEach(g => {
+    if (g.pillar !== lastPillar) {
+      const og = document.createElement('optgroup');
+      og.label = g.pillar;
+      sel.appendChild(og);
+      lastPillar = g.pillar;
+    }
+    const o = document.createElement('option');
+    o.value = g.id; o.textContent = g.name;
+    sel.lastChild.appendChild(o);
+  });
+  if (cur) sel.value = cur;
+}
+
+function renderGoalsManager() {
+  const el = document.getElementById('goalsManagerList');
+  if (!el) return;
+  if (!GOALS.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🎯</div>No goals yet.</div>'; return; }
+  let lastPillar = '';
+  let html = '';
+  GOALS.forEach((g, idx) => {
+    if (g.pillar !== lastPillar) {
+      if (lastPillar) html += '</div>';
+      html += `<div class="gm-pillar-block">
+        <div class="gm-pillar-label" style="color:${pillarColor(g.pillar)}">${g.pillar}</div>`;
+      lastPillar = g.pillar;
+    }
+    const isEditing = editingGoalId === g.id;
+    html += `<div class="gm-row" id="gmrow-${g.id}">
+      <span class="gm-dot" style="background:${pillarColor(g.pillar)}"></span>
+      ${isEditing
+        ? `<input class="gm-name-input" id="gedit-${g.id}" value="${g.name.replace(/"/g,'&quot;')}"
+             onkeydown="if(event.key==='Enter')saveGoalName(${g.id});if(event.key==='Escape')cancelEditGoal()">`
+        : `<span class="gm-name">${g.name}</span>`}
+      <span class="gm-priority">${g.priority}</span>
+      <div class="gm-actions">
+        <button class="gm-btn" onclick="moveGoal(${g.id},-1)" title="Move up" ${idx===0?'disabled':''}>↑</button>
+        <button class="gm-btn" onclick="moveGoal(${g.id},1)" title="Move down" ${idx===GOALS.length-1?'disabled':''}>↓</button>
+        ${isEditing
+          ? `<button class="gm-btn save" onclick="saveGoalName(${g.id})">Save</button>
+             <button class="gm-btn" onclick="cancelEditGoal()">Cancel</button>`
+          : `<button class="gm-btn" onclick="startEditGoal(${g.id})">Edit</button>`}
+        <button class="gm-btn danger" onclick="deleteGoal(${g.id})">Delete</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+async function insertLog(goalId, date, hours) {
+  setStatus('syncing');
+  try {
+    const data = await sbFetch('logs', {
+      method: 'POST',
+      prefer: 'return=representation',
+      body: JSON.stringify({ goal_id: goalId, date, hours })
+    });
+    const r = data[0];
+    logs.unshift({ id: r.id, goalId: r.goal_id, date: r.date, hours: parseFloat(r.hours) });
+    setStatus('synced');
+    return true;
+  } catch(e) {
+    setStatus('error');
+    showToast('Error saving — check connection');
+    console.error('Insert error:', e);
+    return false;
+  }
+}
+
+async function removeLog(id) {
+  setStatus('syncing');
+  try {
+    await sbFetch('logs?id=eq.' + id, { method: 'DELETE' });
+    logs = logs.filter(l => l.id !== id);
+    setStatus('synced');
+  } catch(e) {
+    setStatus('error');
+    showToast('Error deleting — check connection');
+  }
+}
+
+function setStatus(s) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  const map = {
+    syncing: ['↻ Syncing…', '#c9a84c'],
+    synced:  ['✦ Synced',   '#7ec8a4'],
+    error:   ['✕ Offline',  '#e87a7a']
+  };
+  const [text, color] = map[s];
+  el.textContent = text;
+  el.style.color = color;
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let logs = [];
+let selectedGoalId = null;
+let activeTab = 'log';
+let logView = 'goal';
+let collapsedPillars = new Set();
+
+function setLogView(v) {
+  logView = v;
+  document.getElementById('vtGoal').classList.toggle('active', v === 'goal');
+  document.getElementById('vtPillar').classList.toggle('active', v === 'pillar');
+  document.getElementById('logGoalView').style.display = v === 'goal' ? 'block' : 'none';
+  document.getElementById('logPillarView').style.display = v === 'pillar' ? 'block' : 'none';
+  renderLogTable();
+}
+
+function togglePillar(pillar) {
+  if (collapsedPillars.has(pillar)) collapsedPillars.delete(pillar);
+  else collapsedPillars.add(pillar);
+  renderLogTable();
+}
+
+function collapseAll() {
+  Object.keys(PILLARS).forEach(p => collapsedPillars.add(p));
+  renderLogTable();
+}
+function expandAll() {
+  collapsedPillars.clear();
+  renderLogTable();
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function getQuarter(dateStr) {
+  const m = new Date(dateStr).getMonth() + 1;
+  return m <= 3 ? 'Q1' : m <= 6 ? 'Q2' : m <= 9 ? 'Q3' : 'Q4';
+}
+function currentQuarter() { return getQuarter(new Date().toISOString().slice(0,10)); }
+function totalHours(goalId, q) {
+  return logs.filter(l => l.goalId === goalId && (!q || getQuarter(l.date) === q))
+             .reduce((s, l) => s + l.hours, 0);
+}
+function pillarColor(p) { return PILLARS[p]?.color || '#888'; }
+function goalColor(g) { return pillarColor(g.pillar); }
+function fmt(h) { return h % 1 === 0 ? h + 'h' : h + 'h'; }
+
+// ── DATE HEADER ───────────────────────────────────────────────────────────────
+(function() {
+  const d = new Date();
+  document.getElementById('headerDate').innerHTML =
+    d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) +
+    '<br>' + currentQuarter() + ' — 2026';
+})();
+
+// ── SIDEBAR GOALS ─────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const el = document.getElementById('goalList');
+  let lastPillar = '';
+  el.innerHTML = GOALS.map(g => {
+    let sep = '';
+    if (g.pillar !== lastPillar) {
+      sep = `<div class="aside-label" style="color:${pillarColor(g.pillar)};opacity:0.7">${g.pillar}</div>`;
+      lastPillar = g.pillar;
+    }
+    const hrs = totalHours(g.id);
+    return `${sep}
+    <div class="goal-item ${selectedGoalId === g.id ? 'selected' : ''}" onclick="selectGoal(${g.id})">
+      <div class="goal-dot" style="background:${goalColor(g)}"></div>
+      <div class="goal-info">
+        <div class="goal-name" title="${g.name}">${g.name}</div>
+      </div>
+      ${hrs > 0 ? `<div class="goal-hours">${fmt(hrs)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function selectGoal(id) {
+  selectedGoalId = selectedGoalId === id ? null : id;
+  // Sync the Log Time dropdown to the clicked goal
+  const sel = document.getElementById('selectGoal');
+  if (sel) sel.value = selectedGoalId || sel.options[0]?.value;
+  renderSidebar();
+  renderLogTable();
+  if (activeTab === 'log') renderStats();
+  if (activeTab === 'quarterly') renderQuarterly();
+}
+
+// ── SELECT OPTIONS built dynamically by rebuildGoalSelect() after load ────────
+(function() {
+  document.getElementById('inputDate').value = new Date().toISOString().slice(0,10);
+})();
+
+// ── LOG TIME ──────────────────────────────────────────────────────────────────
+async function logTime() {
+  const goalId = +document.getElementById('selectGoal').value;
+  const date   = document.getElementById('inputDate').value;
+  const hours  = +document.getElementById('inputHours').value;
+  if (!goalId || !date || !hours || hours <= 0) return showToast('Fill all fields ✦');
+  const btn = document.querySelector('.btn-log');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const ok = await insertLog(goalId, date, hours);
+  btn.disabled = false; btn.textContent = '+ Log';
+  if (ok) {
+    document.getElementById('inputHours').value = '';
+    renderAll();
+    showToast('Logged ' + fmt(hours) + ' ✦');
+  }
+}
+
+// ── STATS ────────────────────────────────────────────────────────────────────
+function renderStats() {
+  const q = currentQuarter();
+  const filtered = selectedGoalId ? logs.filter(l => l.goalId === selectedGoalId) : logs;
+  const todayStr = new Date().toISOString().slice(0,10);
+  const todayH = filtered.filter(l => l.date === todayStr).reduce((s,l) => s+l.hours, 0);
+  const qH = filtered.filter(l => getQuarter(l.date) === q).reduce((s,l) => s+l.hours, 0);
+  const totalH = filtered.reduce((s,l) => s+l.hours, 0);
+  const days = [...new Set(filtered.map(l=>l.date))].length;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Today</div><div class="stat-value">${todayH}</div><div class="stat-sub">hours logged</div></div>
+    <div class="stat-card stat-gold"><div class="stat-label">${q} Total</div><div class="stat-value">${qH}</div><div class="stat-sub">hours this quarter</div></div>
+    <div class="stat-card"><div class="stat-label">Year Total</div><div class="stat-value">${totalH}</div><div class="stat-sub">hours in 2026</div></div>
+    <div class="stat-card"><div class="stat-label">Active Days</div><div class="stat-value">${days}</div><div class="stat-sub">days tracked</div></div>
+  `;
+}
+
+// ── LOG TABLE ────────────────────────────────────────────────────────────────
+function renderLogTable() {
+  const filtered = selectedGoalId ? logs.filter(l => l.goalId === selectedGoalId) : logs;
+
+  // ── GOAL VIEW (default flat table) ──
+  const tbody = document.getElementById('logBody');
+  const empty = document.getElementById('logEmpty');
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    tbody.innerHTML = filtered.slice(0,50).map(l => {
+      const g = GOALS.find(x => x.id === l.goalId);
+      const d = new Date(l.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+      return `<tr>
+        <td>${d}</td>
+        <td class="goal-cell">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${goalColor(g)};margin-right:8px;vertical-align:middle"></span>
+          ${g.name}
+        </td>
+        <td><span class="badge" style="background:${goalColor(g)}22;color:${goalColor(g)}">${g.pillar}</span></td>
+        <td class="hours-cell">${l.hours}</td>
+        <td><button class="btn-del" onclick="deleteLog(${l.id})">×</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── PILLAR VIEW (grouped + collapsible) ──
+  const pg = document.getElementById('pillarGroups');
+  const pe = document.getElementById('pillarEmpty');
+  if (!filtered.length) { pg.innerHTML = ''; pe.style.display = 'block'; return; }
+  pe.style.display = 'none';
+
+  // group logs by pillar
+  const byPillar = {};
+  filtered.forEach(l => {
+    const g = GOALS.find(x => x.id === l.goalId);
+    if (!byPillar[g.pillar]) byPillar[g.pillar] = [];
+    byPillar[g.pillar].push({...l, goal: g});
+  });
+
+  pg.innerHTML = Object.entries(PILLARS).filter(([p]) => byPillar[p]).map(([p, {color}]) => {
+    const pLogs = byPillar[p];
+    const totH = pLogs.reduce((s,l) => s+l.hours, 0);
+    const isCollapsed = collapsedPillars.has(p);
+
+    const rows = pLogs.slice(0,30).map(l => {
+      const d = new Date(l.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+      return `<tr>
+        <td style="padding-left:18px;width:70px">${d}</td>
+        <td class="goal-cell">
+          <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:${color};margin-right:8px;vertical-align:middle;opacity:0.7"></span>
+          ${l.goal.name}
+        </td>
+        <td style="width:60px;color:var(--gold);font-family:'DM Serif Display',serif;font-size:15px">${l.hours}</td>
+        <td style="width:36px"><button class="btn-del" onclick="deleteLog(${l.id})">×</button></td>
+      </tr>`;
+    }).join('');
+
+    return `<div class="pillar-group ${isCollapsed ? 'collapsed' : ''}" id="pg-${p.replace(/\W/g,'_')}">
+      <div class="pillar-group-header" onclick="togglePillar('${p}')">
+        <span class="pillar-group-chevron">▾</span>
+        <div style="display:flex;align-items:center;gap:8px;flex:1">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color}"></span>
+          <span class="pillar-group-name" style="color:${color}">${p}</span>
+        </div>
+        <div class="pillar-group-meta">
+          <span>${pLogs.length} log${pLogs.length>1?'s':''}</span>
+          <span class="pillar-group-hrs" style="color:${color}">${fmt(totH)}</span>
+        </div>
+      </div>
+      <div class="pillar-group-body">
+        <table><tbody>${rows}</tbody></table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteLog(id) {
+  await removeLog(id);
+  renderAll();
+  showToast('Removed ✦');
+}
+
+// ── QUARTERLY ────────────────────────────────────────────────────────────────
+function renderQuarterly() {
+  const cq = currentQuarter();
+  const quarters = ['Q1','Q2','Q3','Q4'];
+  const qMonths = { Q1:'Jan–Mar', Q2:'Apr–Jun', Q3:'Jul–Sep', Q4:'Oct–Dec' };
+
+  document.getElementById('quarterGrid').innerHTML = quarters.map(q => {
+    const ql = logs.filter(l => getQuarter(l.date) === q);
+    const tot = ql.reduce((s,l) => s+l.hours, 0);
+    const days = [...new Set(ql.map(l=>l.date))].length;
+    const isCurr = q === cq;
+
+    // top 3 goals
+    const byGoal = {};
+    ql.forEach(l => { byGoal[l.goalId] = (byGoal[l.goalId]||0) + l.hours; });
+    const top = Object.entries(byGoal).sort((a,b)=>b[1]-a[1]).slice(0,4);
+    const maxH = top[0]?.[1] || 1;
+    const bars = top.map(([gid,h]) => {
+      const g = GOALS.find(x=>x.id==gid);
+      return `<div class="q-bar-row">
+        <div class="q-bar-name" title="${g.name}">${g.name.split(' ').slice(0,2).join(' ')}</div>
+        <div class="q-bar-track"><div class="q-bar-fill" style="width:${(h/maxH*100).toFixed(1)}%;background:${goalColor(g)}"></div></div>
+        <div class="q-bar-hrs">${fmt(h)}</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="q-card ${isCurr?'q-current':''}">
+      <div class="q-label">${q} ${isCurr?'· Current':''} · ${qMonths[q]}</div>
+      <div class="q-total">${tot}<span style="font-size:14px;font-family:'DM Sans';color:var(--text-dim)">h</span></div>
+      <div class="q-sub">${days} days active</div>
+      <div class="q-bars">${bars || '<div style="font-size:12px;color:var(--text-muted)">No logs yet</div>'}</div>
+    </div>`;
+  }).join('');
+
+  // goal breakdown for current quarter
+  const cqLogs = logs.filter(l => getQuarter(l.date) === cq);
+  const byGoal = {};
+  cqLogs.forEach(l => { byGoal[l.goalId] = (byGoal[l.goalId]||0) + l.hours; });
+  const sorted = Object.entries(byGoal).sort((a,b)=>b[1]-a[1]);
+  const maxH = sorted[0]?.[1] || 1;
+
+  document.getElementById('qGoalBreakdown').innerHTML = sorted.length ? `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${sorted.map(([gid,h]) => {
+        const g = GOALS.find(x=>x.id==gid);
+        return `<div class="pillar-row">
+          <div class="pillar-name" title="${g.name}" style="width:200px">${g.name}</div>
+          <div class="pillar-track"><div class="pillar-fill" style="width:${(h/maxH*100).toFixed(1)}%;background:${goalColor(g)}"></div></div>
+          <div class="pillar-val">${fmt(h)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  ` : '<div class="empty"><div class="empty-icon">📊</div>No data for this quarter yet.</div>';
+}
+
+// ── YEARLY ────────────────────────────────────────────────────────────────────
+function renderYearly() {
+  const tot = logs.reduce((s,l)=>s+l.hours,0);
+  const days = [...new Set(logs.map(l=>l.date))].length;
+  const goals = [...new Set(logs.map(l=>l.goalId))].length;
+  const best = logs.reduce((acc,l)=>{
+    const day = acc.days[l.date] = (acc.days[l.date]||0)+l.hours;
+    if(day>acc.max){acc.max=day;acc.date=l.date;}
+    return acc;
+  },{days:{},max:0,date:''});
+
+  document.getElementById('yearlyStats').innerHTML = `
+    <div class="stat-card stat-gold"><div class="stat-label">Total 2026</div><div class="stat-value">${tot}</div><div class="stat-sub">hours logged</div></div>
+    <div class="stat-card"><div class="stat-label">Active Days</div><div class="stat-value">${days}</div><div class="stat-sub">days tracked</div></div>
+    <div class="stat-card"><div class="stat-label">Goals Touched</div><div class="stat-value">${goals}</div><div class="stat-sub">of ${GOALS.length} goals</div></div>
+    <div class="stat-card"><div class="stat-label">Best Day</div><div class="stat-value">${best.max||0}</div><div class="stat-sub">${best.date?new Date(best.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'-'}</div></div>
+  `;
+
+  // Pillar bars
+  const byPillar = {};
+  logs.forEach(l => {
+    const g = GOALS.find(x=>x.id===l.goalId);
+    byPillar[g.pillar] = (byPillar[g.pillar]||0) + l.hours;
+  });
+  const maxP = Math.max(...Object.values(byPillar),1);
+  document.getElementById('pillarBars').innerHTML = Object.entries(PILLARS).map(([p,{color}]) => {
+    const h = byPillar[p] || 0;
+    return `<div class="pillar-row">
+      <div class="pillar-name">${p}</div>
+      <div class="pillar-track"><div class="pillar-fill" style="width:${(h/maxP*100).toFixed(1)}%;background:${color}"></div></div>
+      <div class="pillar-val">${fmt(h)}</div>
+    </div>`;
+  }).join('');
+
+  // All goals
+  const byGoal = {};
+  logs.forEach(l => { byGoal[l.goalId] = (byGoal[l.goalId]||0) + l.hours; });
+  const maxG = Math.max(...Object.values(byGoal),1);
+  const sorted = [...GOALS].sort((a,b)=>(byGoal[b.id]||0)-(byGoal[a.id]||0));
+  document.getElementById('allGoalsBars').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${sorted.map(g => {
+        const h = byGoal[g.id]||0;
+        return `<div class="pillar-row">
+          <div class="pillar-name" title="${g.name}" style="width:200px">${g.name}</div>
+          <div class="pillar-track"><div class="pillar-fill" style="width:${(h/maxG*100).toFixed(1)}%;background:${goalColor(g)};opacity:${h?1:0.2}"></div></div>
+          <div class="pillar-val" style="color:${h?'var(--text)':'var(--text-muted)'}">${fmt(h)}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ── TAB SWITCH ────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['log','quarterly','yearly','goals'][i] === tab);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  renderAll();
+}
+
+// ── EXPORT CSV ───────────────────────────────────────────────────────────────
+function exportCSV() {
+  const rows = [['Date','Goal','Pillar','Priority','Hours','Quarter']];
+  logs.forEach(l => {
+    const g = GOALS.find(x=>x.id===l.goalId);
+    rows.push([l.date, g.name, g.pillar, g.priority, l.hours, getQuarter(l.date)]);
+  });
+  const csv = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = '2026_time_tracker.csv';
+  a.click();
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── RENDER ALL ───────────────────────────────────────────────────────────────
+function renderAll() {
+  renderSidebar();
+  renderStats();
+  renderLogTable();
+  if (activeTab === 'quarterly') renderQuarterly();
+  if (activeTab === 'yearly') renderYearly();
+  if (activeTab === 'goals') renderGoalsManager();
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+async function boot() {
+  await loadGoals();
+  await loadLogs();
+  renderAll();
+}
+
+boot();
+</script>
+</body>
+</html>
