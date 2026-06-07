@@ -2,7 +2,7 @@
 
 > A fully deployed, cloud-synced personal time tracker — built without writing a single line of code, using AI (Claude), Supabase, and Netlify.
 
-**Live app →** [your-netlify-url.netlify.app](https://symphonious-valkyrie-fde918.netlify.app)
+**Live app →** [https://zata-2026-tracker.netlify.app/]([https://symphonious-valkyrie-fde918.netlify.app](https://zata-2026-tracker.netlify.app/))
 
 ---
 
